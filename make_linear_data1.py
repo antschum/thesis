@@ -23,16 +23,17 @@ sc.pp.scale(vdata, layer='velocity')
 
 
 # velocity genes
-targets = vdata.var.index[vdata.var['velocity_genes'] == True].tolist()
+targets = vdata.var.index[vdata.var['velocity_genes'] == True].tolist()[:300]
 
 # transcription8
 predictors = ['Klf2', 'Mcm3', 'Mcm5', 'Hmgb2', 'Cdk4', 'Hif1a', 'Mcm6', 'Tox']
 X = vdata[:, predictors].layers['Ms']
 
-model = Lasso(alpha=0.000013)
+### Model
+model = LinearRegression()
 
 
-path = 'data/'+'lasso_000013'
+path = 'data/'+'linear'
 if os.path.exists(path):
     shutil.rmtree(path)
 os.mkdir(path)
