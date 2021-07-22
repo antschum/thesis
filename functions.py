@@ -56,3 +56,41 @@ def reorder_like_clustermap(data, clustermap):
     reordered = data.loc[newrow,newcol]
     
     return reordered
+
+
+
+
+def help_summary(msl, regnet_all):
+    
+    data = pd.DataFrame()
+    summary = {}
+    #percentages = [0.01, 0.05, 0.1, 0.15, 0.2, 0.25, 0.3, 0.35, 0.4, 0.5]
+    percentages = list(np.arange(0, 1.02, 0.02))
+
+
+    for i in percentages:
+        n = int(len(msl)*i/2)
+        smallest = msl.nsmallest(columns='mean/sd', n=n)
+        largest = msl.nlargest(columns='mean/sd', n=n)
+        data = pd.concat([smallest, largest], axis=0)
+        # Comparing Data from RegNetWeb
+
+        predictors = data['predictors'].drop_duplicates().tolist()
+
+        for x in predictors:
+            t = regnet_all[regnet_all['regulator_symbol']==x]['target_symbol'].tolist()
+            d = data[data['predictors']==x]['target'].tolist()
+            s = list(set(t) & set(d))
+            summary.setdefault(str(i), {})[x]={'total': len(t), 'matchP': s}
+
+        for x in predictors:
+            t = regnet_all[regnet_all['target_symbol']==x]['regulator_symbol'].tolist()
+            d = data[data['predictors']==x]['target'].tolist()
+            s = list(set(t) & set(d))
+            summary[str(i)][x]['total']+= len(t)
+            summary[str(i)][x]['matchT']= s
+            
+        if str(i) not in summary:
+            summary.setdefault(str(i), {})['dummy']={'total': 0, 'matchP': [], 'matchT': []}
+
+    return summary, percentages
