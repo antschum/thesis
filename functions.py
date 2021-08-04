@@ -80,11 +80,6 @@ def reorder_like_clustermap(data, clustermap):
     
     return reordered
 
-# cut down the number of pairs thata have to be checked in each permutation round. 
-def return_relevant_pairs(predictors, targets, regnet_all):
-    #diff = pd.merge(predictors, regnet_all, left_on='' ,how='inner')
-    j
-
 
 def help_summary(msl, regnet_all):
     
@@ -93,8 +88,8 @@ def help_summary(msl, regnet_all):
     #percentages = [0.01, 0.05, 0.1, 0.15, 0.2, 0.25, 0.3, 0.35, 0.4, 0.5]
     percentages = list(np.arange(0, 1.02, 0.02))
 
-    # THIS IS MY TIME SINK. WHY it takes forever. have to think about htis.
-    # remove all unnecessary pairs. should go down to 90. 
+    # Are there suitibel pandas functions that can do the same as I am here? 
+    # Cut down on for loops!!
     for i in percentages:
         n = int(len(msl)*i/2)
         smallest = msl.nsmallest(columns='mean/sd', n=n)
@@ -120,7 +115,7 @@ def help_summary(msl, regnet_all):
         if str(i) not in summary:
             summary.setdefault(str(i), {})['dummy']={'total': 0, 'matchP': [], 'matchT': []}
 
-    return summary
+    return summary, percentages
 
 
 
@@ -141,6 +136,7 @@ def help_summary_to_count(summary, percentages):
 
 def permutations(msl, regnet_all, c = 1):
     permut = shuffle_meanSD(msl)
+
     summary, percentages = help_summary(permut, regnet_all)
     
     count = help_summary_to_count(summary, percentages)     
@@ -151,7 +147,6 @@ def permutations(msl, regnet_all, c = 1):
         print("currently at ",c, 'permutation')
         print(permut)
     
-    print(count)
     #maybe saving the summary takes time too?? not sure here. going to take it out. 
     # summary was returned for all others. 
     return count
@@ -167,6 +162,7 @@ def help_meanSD(coefs):
     msl['mean/sd'] = msl['mean']/msl['sd']
 
     msl = msl.reset_index(col_fill =['predictors', 'target', 'mean', 'sd', 'mean/sd']) 
+    print('This is the output of meanSD', msl)
     return msl
 
 def help_import_database(database):
@@ -189,15 +185,11 @@ def evaluate_permutations(coefs, database, path):
     
     #THIS IS STILL A WORK IN PROGRESS. 
     # permutations
-    pool = mp.Pool(mp.cpu_count())
-    # Step 2: Define callback function to collect the output in `results`
 
     for c in list(range(0, 1000)):
-        pool.apply_async(permutations, args=(msl, regnet_all, c), callback=collect_result)
+        c = permutations(msl, regnet_all, c)
+        total = total+c
 
-    #total = [pool.apply_async(permutations, args=(msl, regnet_all, c), callback=collect_result) for c in list(range(0, 1000))]
-    pool.close()
-    pool.join()
 
 # this is the long way. 
     #total = [permutations(msl, regnet_all, c) for c in list(range(0, 1000))]
