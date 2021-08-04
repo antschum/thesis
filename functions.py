@@ -1,5 +1,6 @@
 import os
 import shutil
+from joblib.parallel import delayed
 import numpy as np
 import pandas as pd
 import random 
@@ -11,6 +12,7 @@ from sklearn.model_selection import train_test_split, cross_validate, KFold
 from sklearn.metrics import explained_variance_score, mean_absolute_error, r2_score, mean_squared_error, make_scorer
 import sys
 import multiprocessing as mp
+from joblib import Parallel, delayed
 #import memory_profiler
 
 
@@ -186,9 +188,11 @@ def evaluate_permutations(coefs, database, path):
     #THIS IS STILL A WORK IN PROGRESS. 
     # permutations
 
-    for c in list(range(0, 1000)):
-        c = permutations(msl, regnet_all, c)
-        total = total+c
+    #for c in list(range(0, 1000)):
+        #c = permutations(msl, regnet_all, c)
+        #total = total+c
+
+    Parallel(n_jobs=-1)(delayed(permutations) (msl, regnet_all, i) for i in range(1000))
 
 
 # this is the long way. 
