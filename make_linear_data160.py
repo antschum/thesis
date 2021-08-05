@@ -43,14 +43,16 @@ X = vdata[:, predictors].layers['Ms']
 model = LinearRegression()
 
 
-path = './'+'linear160'
+path = './'+'linear160test'
 if os.path.exists(path):
     shutil.rmtree(path)
 os.mkdir(path)
 
-for t in targets:
-   f.generating_regressions(model=model, predictors=predictors, t=t, X=X, y=vdata[:, t].layers['velocity'], n_splits=10, path = path+'/'+t) 
+# normally go through all targets individually, generate this huge folder. try doing it directly. 
+#for t in targets:
+   #f.generating_regressions(model=model, predictors=predictors, t=t, X=X, y=vdata[:, t].layers['velocity'], n_splits=10, path = path+'/'+t) 
 
+f.generating_regressions(model=model, predictors=predictors, targets=targets, X=X, y=vdata[:, targets].layers['velocity'], n_splits=10, path = path+'/'+'this') 
 
 #path = f.generating_regressions(model, vdata[:10], transcription8, targets, 10, 'lasso_000013')
 

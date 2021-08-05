@@ -12,7 +12,7 @@ regnet_targets = pd.read_csv('regnet_targets.csv')
 regnet_all = pd.concat([regnet_regulators, regnet_targets], axis=0)
 
 
-# capitalize first letter
+# capitalize first letter to make strings comparable
 regnet_all['regulator_symbol'] = [x.capitalize() for x in regnet_all['regulator_symbol']]
 regnet_all['target_symbol'] = [x.capitalize() for x in regnet_all['target_symbol']]
 
@@ -61,4 +61,3 @@ permut['mean'] = np.mean(total, axis=0)
 permut['std'] = np.std(total, axis=0)
 
 permut.to_pickle('permutations.pkl')
-print(permut)
