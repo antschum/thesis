@@ -182,8 +182,6 @@ def evaluate_permutations(coefs, database, path):
 
     # update df for mena/sd ratio
     msl = help_meanSD(coefs)
-
-    total = []
     
     #THIS IS STILL A WORK IN PROGRESS. 
     # permutations
@@ -192,7 +190,7 @@ def evaluate_permutations(coefs, database, path):
         #c = permutations(msl, regnet_all, c)
         #total = total+c
 
-    Parallel(n_jobs=-1)(delayed(permutations) (msl, regnet_all, i) for i in range(1000))
+    total = Parallel(n_jobs=-1)(delayed(permutations) (msl, regnet_all, i) for i in range(1000))
 
 
 # this is the long way. 
