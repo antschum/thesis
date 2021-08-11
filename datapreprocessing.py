@@ -27,7 +27,7 @@ def get_predictors(predictors):
     return pred
 
 
-def get_data(predictors = 'tf160', datafile="velocity_adata.h5ad"):
+def get_data(predictors = 'tf160',targets='velocity_genes', datafile="velocity_adata.h5ad"):
     # load dataset
     vdata = sc.read_h5ad(datafile)
     pred = get_predictors(predictors)
