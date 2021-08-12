@@ -5,9 +5,10 @@ import time
 import datapreprocessing
 import os
 
+start = time.time()
 
 # merge all rf importances to one df
-path = './rf/coefs'
+path = './rf_lID/coefs'
 
 coefs = pd.DataFrame()
 
@@ -18,26 +19,38 @@ for (dirpath, dirnames, filenames) in os.walk(path):
             df = pickle.load(file)
             coefs = pd.concat([coefs, df])
 
-coefs.to_pickle('rf/Coefs.pkl')
+coefs.to_pickle('rf_lID/Coefs.pkl')
 
 # create count
 regnet_all = f.help_import_database('data/regnet160_all.pkl')
 
-# start = time.process_time()
+# permutations rf
 coefs = f.help_pivot_to_df(coefs)
-# print('help_pivot_to_df', time.process_time() - start)
-# start = time.process_time()
+
+database_file = 'data/regnet160_all.pkl'
+path = './rf_lID/'
+
+permut  = f.evaluate_permutations(coefs, database_file,  path)
+
+
+# evaluate counts
 coefs = f.help_meanSD(coefs)
-# print('meanSD takes', time.process_time() - start)
-# start = time.process_time()
+
 summary, percentages = f.help_summary(coefs, regnet_all)
-# print('Help_summary', time.process_time() - start)
-# print(summary)
 
 count = f.help_summary_to_count(summary, percentages)
 
-with open('rf/count.pkl', 'wb') as f:  
+with open('rf_lID/count.pkl', 'wb') as f:  
     pickle.dump(count, f)
+
+end = time.time()
+
+hours, rem = divmod(end-start, 3600)
+minutes, seconds = divmod(rem, 60)
+print("This is the time passed: {:0>2}:{:0>2}:{:05.2f}".format(int(hours),int(minutes),seconds))
+
+
+
 
 
 

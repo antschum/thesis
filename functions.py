@@ -171,10 +171,18 @@ def help_import_database(database):
     regnet_all['target_symbol'] = [x.capitalize() for x in regnet_all['target_symbol']] 
     return regnet_all
 
+def generate_count(coefs, regnet_all):
+    summary, percentages = help_summary(coefs, regnet_all)
+    count = help_summary_to_count(summary, percentages)
 
-def evaluate_permutations(coefs, database, path):
+    with open('rf/count.pkl', 'wb') as f:  
+         pickle.dump(count, f)
+    return count
+
+
+def evaluate_permutations(coefs, database_file, path):
     # import datasets
-    regnet_all = help_import_database(database)
+    regnet_all = help_import_database(database_file)
 
     # update df for mena/sd ratio
     msl = help_meanSD(coefs)
@@ -198,8 +206,9 @@ def evaluate_permutations(coefs, database, path):
     permut['std'] = np.std(total, axis=0)
     permut['percentage'] = percentages 
 
+    count = generate_count(coefs, regnet_all)
     permut.to_pickle(path+'permutations.pkl')
-    return permut
+    return permut, count
 
 
 def merge_regnet(regnet_regulators_file, regnet_targets_file, targets, file_name):
