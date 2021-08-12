@@ -7,19 +7,7 @@ import os
 
 start = time.time()
 
-# merge all rf importances to one df
-path = './rf_lID/coefs'
-
-coefs = pd.DataFrame()
-
-for (dirpath, dirnames, filenames) in os.walk(path):
-    print(filenames)
-    for name in filenames:
-        with open(path+'/'+name, 'rb') as file:
-            df = pickle.load(file)
-            coefs = pd.concat([coefs, df])
-
-coefs.to_pickle('rf_lID/Coefs.pkl')
+coefs = pd.read_pickle('rf/Coefs.pkl')
 
 # create count
 regnet_all = f.help_import_database('data/regnet160_all.pkl')
@@ -28,9 +16,11 @@ regnet_all = f.help_import_database('data/regnet160_all.pkl')
 coefs = f.help_pivot_to_df(coefs)
 
 database_file = 'data/regnet160_all.pkl'
-path = './rf_lID/'
+path = './rf/'
 
-permut, count  = f.evaluate_permutations(coefs, database_file,  path)
+msl = f.help_meanSD(coefs)
+regnet = f.help_import_database(database_file)
+count  = f.generate_count(msl, regnet,  path)
 
 end = time.time()
 
