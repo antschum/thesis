@@ -1,5 +1,5 @@
 import datapreprocessing as dp
-from sklearn.tree import DecisionTreeRegressor  
+from sklearn.tree import DecisionTreeRegressor, plot_tree, export_text
 import functions as f
 import time
 
@@ -9,16 +9,20 @@ database_file = 'data/regnet160_all.pkl'
 
 predictors, X, velocity_genes, y = dp.get_data('tf160')
 
-model = DecisionTreeRegressor()
+model = DecisionTreeRegressor(max_depth=7)
+model.fit(X,y)
+t = export_text(model, feature_names=predictors)
+print(t)
 
-#somehow the coefficeints, the dimensinos have to be transposed, pls.coef returns different dimensions. is this only for pca?
-coefs, scores = f.generating_regressions(model, predictors, velocity_genes, X, y, 10, path = filepath, transpose_coefs=True)
+# #somehow the coefficeints, the dimensinos have to be transposed, pls.coef returns different dimensions. is this only for pca?
+# coefs, scores = f.generating_regressions(model, predictors, velocity_genes, X, y, 10, path = filepath, transpose_coefs=True)
+# print(coefs)
+# plot_tree(scores['estimators'][0])
+# coefs = f.help_pivot_to_df(coefs)
 
-coefs = f.help_pivot_to_df(coefs)
+# permut = f.evaluate_permutations(coefs, database_file, path = filepath)
+# end = time.time()
 
-permut = f.evaluate_permutations(coefs, database_file, path = filepath)
-end = time.time()
-
-hours, rem = divmod(end-start, 3600)
-minutes, seconds = divmod(rem, 60)
-print("THis is the time passed: {:0>2}:{:0>2}:{:05.2f}".format(int(hours),int(minutes),seconds))
+# hours, rem = divmod(end-start, 3600)
+# minutes, seconds = divmod(rem, 60)
+# print("THis is the time passed: {:0>2}:{:0>2}:{:05.2f}".format(int(hours),int(minutes),seconds))

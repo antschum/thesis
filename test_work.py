@@ -7,10 +7,10 @@ import pandas as pd
 
 filepath = './test_work/'
 database_file = 'data/regnet160_all.pkl'
-#test_work = ['Klf2', 'Mcm3', 'Hif1a', 'Tcf7']
+#test4 = ['Klf2', 'Mcm3', 'Hif1a', 'Tcf7']
 regnet_all = pd.read_pickle('data/regnet160_all.pkl')
 
-predictors, X, velocity_genes, y = dp.get_data(predictors='test_work')
+predictors, X, velocity_genes, y = dp.get_data(predictors='test4')
 
 model = PLSRegression(n_components=4)
 

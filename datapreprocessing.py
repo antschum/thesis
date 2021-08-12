@@ -8,15 +8,17 @@ def get_predictors(predictors):
     
     elif predictors=='tf160':
         open_file = open('data/transcriptionfactors160.pkl', "rb")
-        pred = pickle.load(open_file)
+        pr = pickle.load(open_file)
         open_file.close()    
 
         # remove factors not available in vdata.var_names -> should be filtered out by default. 
         for x in  ['Junb', 'mt-Nd1', 'Fgl2', 'mt-Co1', 'mt-Nd4', 'Rraga', 'mt-Nd2']:
-            if x in pred:
-                pred.remove(x)
+            if x in pr:
+                pr.remove(x)
+        pred = []
+        [pred.append(x) for x in pr if x not in pred]
 
-    elif predictors=='test_work':
+    elif predictors=='test4':
         pred = ['Klf2', 'Mcm3', 'Hif1a', 'Tcf7']
     
     else:

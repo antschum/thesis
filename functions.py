@@ -171,8 +171,8 @@ def help_import_database(database):
     regnet_all['target_symbol'] = [x.capitalize() for x in regnet_all['target_symbol']] 
     return regnet_all
 
-def generate_count(coefs, regnet_all):
-    summary, percentages = help_summary(coefs, regnet_all)
+def generate_count(msl, regnet_all):
+    summary, percentages = help_summary(msl, regnet_all)
     count = help_summary_to_count(summary, percentages)
 
     with open('rf/count.pkl', 'wb') as f:  
@@ -206,8 +206,9 @@ def evaluate_permutations(coefs, database_file, path):
     permut['std'] = np.std(total, axis=0)
     permut['percentage'] = percentages 
 
-    count = generate_count(coefs, regnet_all)
     permut.to_pickle(path+'permutations.pkl')
+
+    count = generate_count(msl, regnet_all)
     return permut, count
 
 

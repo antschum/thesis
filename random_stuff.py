@@ -30,18 +30,7 @@ coefs = f.help_pivot_to_df(coefs)
 database_file = 'data/regnet160_all.pkl'
 path = './rf_lID/'
 
-permut  = f.evaluate_permutations(coefs, database_file,  path)
-
-
-# evaluate counts
-coefs = f.help_meanSD(coefs)
-
-summary, percentages = f.help_summary(coefs, regnet_all)
-
-count = f.help_summary_to_count(summary, percentages)
-
-with open('rf_lID/count.pkl', 'wb') as f:  
-    pickle.dump(count, f)
+permut, count  = f.evaluate_permutations(coefs, database_file,  path)
 
 end = time.time()
 
