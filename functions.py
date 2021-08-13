@@ -44,7 +44,7 @@ def generating_regressions(model,predictors, targets, X, y, n_splits, path, tran
 
         # I could define my own scorer object; since error, want to minimize it -> the smaller the values the better. 
         # do not use jobs. this is what kills the kernel (for some reason..) !! not true. still happend, 
-        s = cross_validate(model, X, y, cv=cv, scoring = {'r2': 'r2', 'neg_mean_squared_error':'neg_mean_squared_error', 'proportion': make_scorer(proportion)}, return_train_score=True, return_estimator=True, n_jobs=-1)
+        s = cross_validate(model, X, y, cv=cv, scoring = {'r2': 'r2', 'neg_mean_squared_error':'neg_mean_squared_error', 'proportion': make_scorer(proportion)}, return_train_score=True, return_estimator=True, n_jobs=-1, )
 
 
         #store results for each gene at the end of the loop before going on to the next gene. 
@@ -171,11 +171,11 @@ def help_import_database(database):
     regnet_all['target_symbol'] = [x.capitalize() for x in regnet_all['target_symbol']] 
     return regnet_all
 
-def generate_count(msl, regnet_all):
+def generate_count(msl, regnet_all, path):
     summary, percentages = help_summary(msl, regnet_all)
     count = help_summary_to_count(summary, percentages)
 
-    with open('rf/count.pkl', 'wb') as f:  
+    with open(path+'count.pkl', 'wb') as f:  
          pickle.dump(count, f)
     return count
 
@@ -208,7 +208,7 @@ def evaluate_permutations(coefs, database_file, path):
 
     permut.to_pickle(path+'permutations.pkl')
 
-    count = generate_count(msl, regnet_all)
+    count = generate_count(msl, regnet_all, path)
     return permut, count
 
 
