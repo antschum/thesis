@@ -40,7 +40,7 @@ predictors = transcription160
 X = vdata[:, predictors].layers['Ms']
 
 # PCA
-n_comp = 152
+n_comp = 50
 pca = PCA(n_components=n_comp).fit(X)
 pca_components = pca.components_
 
@@ -54,7 +54,8 @@ coefs, scores = f.generating_regressions(lin,
                          X=pca_transform, 
                          y=vdata[:, velocity_genes].layers['velocity'], 
                          n_splits = 10, 
-                         path='./pca/')
+                         path='./pca/',
+                         pca=True)
 
 
 # scores has linear regressions, can get lin there. 

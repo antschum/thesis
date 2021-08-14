@@ -3,6 +3,8 @@ import functions as f
 import datapreprocessing as dp
 import time
 
+
+# THis does not converge. super wierd. 
 start = time.time()
 # Update this. 
 filepath = './lasso/'

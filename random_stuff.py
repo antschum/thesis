@@ -7,7 +7,7 @@ import os
 
 start = time.time()
 
-coefs = pd.read_pickle('rf/Coefs.pkl')
+coefs = pd.read_pickle('linearQuick/Coefs.pkl')
 
 # create count
 regnet_all = f.help_import_database('data/regnet160_all.pkl')
@@ -16,7 +16,7 @@ regnet_all = f.help_import_database('data/regnet160_all.pkl')
 coefs = f.help_pivot_to_df(coefs)
 
 database_file = 'data/regnet160_all.pkl'
-path = './rf/'
+path = './linearQuick/'
 
 msl = f.help_meanSD(coefs)
 regnet = f.help_import_database(database_file)

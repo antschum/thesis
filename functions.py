@@ -29,7 +29,7 @@ def help_pivot_to_df(coefs):
     return df
 
 #@profile
-def generating_regressions(model,predictors, targets, X, y, n_splits, path, transpose_coefs=False):  
+def generating_regressions(model,predictors, targets, X, y, n_splits, path, transpose_coefs=False, pca=False):  
         coefs = pd.DataFrame()
 
 
@@ -52,6 +52,12 @@ def generating_regressions(model,predictors, targets, X, y, n_splits, path, tran
         if transpose_coefs:
             for x in s['estimator']:
                 coefs = pd.concat([pd.DataFrame(x.coef_.transpose(), index = targets, columns = predictors), 
+                                coefs])
+    
+        if pca:
+            for x in s['estimator']:
+                # irgendwas ist komisch.. glaube es sollte der index der targets addierbar sein..
+                coefs = pd.concat([pd.DataFrame(x.coef_), 
                                 coefs])
             
         else:
@@ -153,6 +159,7 @@ def permutations(msl, regnet_all, c = 1):
     # summary was returned for all others. 
     return count
 
+# GO WITH MEDIAN HERE>i
 def help_meanSD(coefs):
     msl = pd.DataFrame()
     msl['mean'] = coefs.groupby(['predictors', 'target']).coefficients.mean()
