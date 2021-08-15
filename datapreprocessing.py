@@ -29,7 +29,7 @@ def get_predictors(predictors):
     return pred
 
 
-def get_data(predictors = 'tf160',targets='velocity_genes', datafile="velocity_adata.h5ad"):
+def get_data(predictors = 'tf160',targets='velocity_genes', datafile="velocity_adata.h5ad", louvain=False):
     # load dataset
     vdata = sc.read_h5ad(datafile)
     pred = get_predictors(predictors)
@@ -47,10 +47,14 @@ def get_data(predictors = 'tf160',targets='velocity_genes', datafile="velocity_a
 
 
     # velocity genes
-    velocity_genes = vdata.var.index[vdata.var['velocity_genes'] == True].tolist()
+    velocity_genes = vdata[:,vdata.var['velocity_genes']].var.index.tolist()
 
-    X = vdata[:, pred].layers['Ms']
-    Y = vdata[:, velocity_genes].layers['velocity']
+    X = vdata[:, pred].to_df('Ms')
+    Y = vdata[:, velocity_genes].to_df('velocity')
+
+    if louvain:
+        X['louvain'] = vdata.obs['louvain']
+        Y['louvain'] = vdata.obs['louvain']
 
     return pred, X, velocity_genes, Y
 

@@ -36,7 +36,7 @@ def generating_regressions(model,predictors, targets, X, y, n_splits, path, tran
         if os.path.exists(path):
             print('Path does exist under directory', os.getcwd()+path)
             shutil.rmtree(path)
-        os.mkdir(path)
+        os.makedirs(path)
 
 
         # prepare cross validation, data shuffled before split into batches
@@ -44,7 +44,8 @@ def generating_regressions(model,predictors, targets, X, y, n_splits, path, tran
 
         # I could define my own scorer object; since error, want to minimize it -> the smaller the values the better. 
         # do not use jobs. this is what kills the kernel (for some reason..) !! not true. still happend, 
-        s = cross_validate(model, X, y, cv=cv, scoring = {'r2': 'r2', 'neg_mean_squared_error':'neg_mean_squared_error', 'proportion': make_scorer(proportion)}, return_train_score=True, return_estimator=True, n_jobs=-1, )
+        # removed proportion scorer. not used very much anyway and threw errors with the clustering (maybe because Im returning a dataframe..)
+        s = cross_validate(model, X, y, cv=cv, scoring = {'r2': 'r2', 'neg_mean_squared_error':'neg_mean_squared_error'}, return_train_score=True, return_estimator=True, n_jobs=-1, )
 
 
         #store results for each gene at the end of the loop before going on to the next gene. 
