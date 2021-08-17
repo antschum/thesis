@@ -16,8 +16,9 @@ import sys
 # Running this for all 160tf took a little less than 2 hr
 
 start = time.time()
-filepath = './rf_lID/'
+filepath = './rf_md30/'
 database_file = 'data/regnet160_all.pkl'
+max_depth = 30
 
 if os.path.exists(filepath):
     print('Path does exist under directory', os.getcwd()+filepath)
@@ -27,7 +28,7 @@ os.mkdir(filepath+'estimators')
 os.mkdir(filepath+'coefs')
 
 
-model = RandomForestRegressor(n_jobs=-1, max_depth=10, max_features='sqrt')
+model = RandomForestRegressor(n_jobs=-1, max_depth=max_depth, max_features='sqrt')
 
 vdata = sc.read_h5ad('velocity_adata.h5ad')
 sc.pp.scale(vdata, layer='Ms')
@@ -77,9 +78,31 @@ print('prep done.')
 #results = pd.concat(results)
 results = pd.concat([generate_reg(X, vdata[:, v].layers['velocity'], model, v) for v in velocity_genes])
 results.to_pickle(filepath+'Scores.pkl')
-print('CV generated.')
+print('CV generated.') 
 
 
+coefs = pd.DataFrame()
+
+# load coefs into one df
+for (dirpath, dirnames, filenames) in os.walk(filepath+'coefs/'):
+    print(filenames)
+    for name in filenames:
+        with open(filepath+'coefs/'+name, 'rb') as file:
+             df = pickle.load(file)
+             coefs = pd.concat([coefs, df])
+
+coefs.to_pickle(filepath+'Coefs.pkl')
+
+# create count
+regnet_all = f.help_import_database(database_file)
+
+# start = time.process_time()
+# permutations rf
+coefs = f.help_pivot_to_df(coefs)
+# print('help_pivot_to_df', time.process_time() - start)
+# start = time.process_time()
+
+permut  = f.evaluate_permutations(coefs, database_file,  filepath)
 
 #joblib.dump(model, filepath+"/random_forest_cv_mrpl15.joblib")
 end = time.time()

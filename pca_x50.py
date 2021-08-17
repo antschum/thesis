@@ -13,6 +13,8 @@ from sklearn.metrics import explained_variance_score, mean_absolute_error, r2_sc
 import functions as f
 from sklearn.decomposition import PCA
 
+
+### ALLES auf datapreprocessing kürzen!!
 # Load dataset with velocity values
 vdata = sc.read_h5ad("velocity_adata.h5ad")
 
@@ -40,6 +42,7 @@ predictors = transcription160
 X = vdata[:, predictors].layers['Ms']
 
 # PCA
+path = './pca_x50/'
 n_comp = 152
 pca = PCA(n_components=n_comp).fit(X)
 pca_components = pca.components_
@@ -53,8 +56,8 @@ coefs, scores = f.generating_regressions(lin,
                          targets = vdata[:, velocity_genes].var_names, 
                          X=pca_transform, 
                          y=vdata[:, velocity_genes].layers['velocity'], 
-                         n_splits = 10, 
-                         path='./pca/')
+                         n_splits = 50, 
+                         path=path)
 
 
 # scores has linear regressions, can get lin there. 
@@ -63,18 +66,13 @@ coefs, scores = f.generating_regressions(lin,
 #so, I need to multiply the corresponding vlaues with the corresponding regression; --> get huge loading matrix. 
 # can I just expand the pca_components so that it is long enough and then do mult?
 
+# --> not super important. much more important to use the coefficients of the linear model... 
+# AAAHH but these are not comparable to the actual coefficients. I am calling them coefficients, but they are laodings. 
 # get dataframe from loadings. 
 gene_impact = pd.DataFrame(np.matmul(coefs,pca_components[:n_comp])) #, columns=vdata[:, transcription160].var_names
 gene_impact.columns = vdata[:, transcription160].var_names 
 
-# reformat pivot table
-gene_df = f.help_pivot_to_df(gene_impact)
+gene_impact.to_pickle('pca/gene_impact.pkl')
 
-gene_df.to_pickle('pca/gene_impact.pkl')
-
-
-# just downloaded the dataset, have to import is and save it somewhere. 
-#f.merge_regnet('./downloads/regnet160_regulator.csv', './downloads/regnet160_target.csv', './data/regnet160_all.pkl')
-permut = f.evaluate_permutations(gene_df, 'data/regnet160_all.pkl', './pca/')
 
 

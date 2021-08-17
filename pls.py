@@ -4,12 +4,12 @@ import functions as f
 import time
 
 start = time.time()
-filepath = './pls/'
+filepath = './pls_10/'
 database_file = 'data/regnet160_all.pkl'
 
 predictors, X, velocity_genes, y = dp.get_data('tf160')
 
-model = PLSRegression(n_components=100)
+model = PLSRegression(n_components=10)
 
 #somehow the coefficeints, the dimensinos have to be transposed, pls.coef returns different dimensions. is this only for pca?
 coefs, scores = f.generating_regressions(model, predictors, velocity_genes, X, y, 10, path = filepath, transpose_coefs=True)
