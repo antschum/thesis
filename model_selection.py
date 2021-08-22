@@ -41,8 +41,6 @@ def gridSearch_validation(X, y, estimator, param_grid, n_splits, path=None):
     
     return clf
 
-
-
 pred, X, velocity_genes, y = dp.get_data(louvain=True)
 
 n_splits = 10
@@ -53,29 +51,58 @@ X_train, X_test, y_train, y_test = train_test_split(X, y, stratify=y['louvain'],
 # Lasso
 lasso = Lasso(random_state=random_state, max_iter=1000)
 path = './model_selection/lasso/'
-lasso_grid = [{'alpha':[0.001, 0.005, 0.01, 0.05, 0.1, 0.5]}]
+#lasso_grid = [{'alpha':[1, 1.1, 1.5, 2, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55, 60, 65, 70, 75, 80, 90, 100, 150]}]
+#lasso_grid = [{'alpha':[1.91203544e-01, 1.78317065e-01, 1.66299092e-01, 1.55091090e-01,
 
+    #    1.44638469e-01, 1.34890321e-01, 1.25799164e-01, 1.17320722e-01,
+    #    1.09413698e-01, 1.02039581e-01, 9.51624546e-02, 8.87488236e-02,
+    #    8.27674500e-02, 7.71892008e-02, 7.19869070e-02, 6.71352304e-02,
+    #    6.26105406e-02, 5.83907997e-02, 5.44554552e-02, 5.07853398e-02,
+    #    4.73625779e-02, 4.41704987e-02, 4.11935549e-02, 3.84172471e-02,
+    #    3.58280533e-02, 3.34133624e-02, 3.11614136e-02, 2.90612386e-02,
+    #    2.71026084e-02, 2.52759833e-02, 2.35724666e-02, 2.19837613e-02,
+    #    2.05021293e-02, 1.91203544e-02, 1.78317065e-02, 1.66299092e-02,
+    #    1.55091090e-02, 1.44638469e-02, 1.34890321e-02, 1.25799164e-02,
+    #    1.17320722e-02, 1.09413698e-02, 1.02039581e-02, 9.51624546e-03,
+    #    8.87488236e-03, 8.27674500e-03, 7.71892008e-03, 7.19869070e-03,
+    #    6.71352304e-03, 6.26105406e-03, 5.83907997e-03, 5.44554552e-03,
+    #    5.07853398e-03, 4.73625779e-03, 4.41704987e-03, 4.11935549e-03,
+    #    3.84172471e-03, 3.58280533e-03, 3.34133624e-03, 3.11614136e-03,
+    #    2.90612386e-03, 2.71026084e-03, 2.52759833e-03, 2.35724666e-03,
+    #    2.19837613e-03, 2.05021293e-03, 1.91203544e-03, 1.78317065e-03,
+    #    1.66299092e-03, 1.55091090e-03, 1.44638469e-03, 1.34890321e-03,
+    #    1.25799164e-03, 1.17320722e-03, 1.09413698e-03, 1.02039581e-03,
+    #    9.51624546e-04, 8.87488236e-04, 8.27674500e-04, 7.71892008e-04,
+    #    7.19869070e-04, 6.71352304e-04, 6.26105406e-04, 5.83907997e-04,
+    #    5.44554552e-04, 5.07853398e-04, 4.73625779e-04, 4.41704987e-04,
+    #    4.11935549e-04, 3.84172471e-04, 3.58280533e-04, 3.34133624e-04,
+    #    3.11614136e-04, 2.90612386e-04, 2.71026084e-04, 2.52759833e-04,
+    #    2.35724666e-04, 2.19837613e-04, 2.05021293e-04, 1.91203544e-04]}]
 
+lasso_grid = [{'alpha':[0.191203544, 0.0951624546, 0.0473625779, 0.0235724666, 0.0117320722, 0.00583907997, 0.00290612386, 0.00144638469, 0.00071986907, 0.000358280533]}]
 
 ## Ridge
 ridge = Ridge(random_state=random_state)
 path = './model_selection/ridge.pkl'
 # 38 seemed really good overall..
-ridge_grid = [{'alpha':[0.5, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55, 60, 65, 70, 75, 80, 90, 100, 150]}]
+ridge_grid = [{'alpha':[1, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55, 60, 65, 70, 75, 80, 90, 100, 150]}]
 
 # clf = gridSearch_validation(X_train.loc[:, X_train.columns != 'louvain'], 
 #                         y_train.loc[:, y_train.columns != 'louvain'],
 #                         ridge, ridge_grid, n_splits, path)
 
 ## Random Forest
-rf = RandomForestRegressor(n_jobs=-1, random_state=random_state, max_depth=30)
-rf_grid = [{'max_features':[3, 5, 12, 40, 100, 151]}]
+rf = RandomForestRegressor(n_jobs=-1, random_state=random_state)
+rf_grid = [{'max_depth': [10, 30, 50, 70, 90],
+            'max_features': ['auto', 'sqrt', 40, 'log2'],
+            'n_estimators': [10]
+            }]
 
 
 
 
 #CHANGE
-model = rf
+model = rf 
 grid = rf_grid
 
 ### comment this in!!
@@ -86,7 +113,7 @@ if os.path.exists(path):
 os.mkdir(path)
 
 
-# Achtung: Ich lasse nur die ersten X trainieren. 
+# X_train.loc[:, (X_train.columns != 'louvain') & (X_train.columns != 'Mcm3')]
 total = Parallel(n_jobs=-1)(delayed(gridSearch_validation) (X_train.loc[:, X_train.columns != 'louvain'], 
                                                             y_train.loc[:, t],
                                                             model, grid, n_splits, path+t+'.pkl') 
