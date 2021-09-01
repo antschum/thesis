@@ -4,7 +4,7 @@ import datapreprocessing as dp
 import functions as f
 from sklearn.linear_model import LinearRegression, Lasso, Ridge
 from sklearn.ensemble import RandomForestRegressor
-from sklearn.model_selection import train_test_split, GridSearchCV, KFold
+from sklearn.model_selection import train_test_split, RandomizedSearchCV, KFold
 from sklearn.metrics import explained_variance_score, mean_absolute_error, r2_score, mean_squared_error, make_scorer
 import sys
 import multiprocessing as mp
@@ -14,10 +14,11 @@ import os
 import shutil
 import time
 
-os.environ['JOBLIB_TEMP_FOLDER'] = './tmp'
+
+# Have not use this yet. No Use. 
 
 start = time.time()
-def gridSearch_validation(X, y, estimator, param_grid, n_splits, path=None):
+def randomSearch_validation(X, y, estimator, param_grid, n_splits, path=None):
 
     # Choose cross-validation techniques for the inner and outer loops,
     # independently of the dataset.
@@ -27,12 +28,13 @@ def gridSearch_validation(X, y, estimator, param_grid, n_splits, path=None):
 
     
     # Non_nested parameter search and scoring; holding back data. 
-    clf = GridSearchCV(estimator=estimator, 
+    clf = RandomizedSearchCV(estimator=estimator, 
                        param_grid=param_grid, 
                        scoring = {'r2': 'r2', 'neg_mean_squared_error':'neg_mean_squared_error'}, 
                        cv=inner_cv, verbose=1.1, 
                        return_train_score=True,
-                       refit = 'r2')
+                       refit = 'r2',
+                       n_iter=100)
 
     clf.fit(X, y)
     
@@ -43,10 +45,16 @@ def gridSearch_validation(X, y, estimator, param_grid, n_splits, path=None):
     
     return clf
 
-##### Models #####
+pred, X, velocity_genes, y = dp.get_data(louvain=True)
+
+n_splits = 10
 random_state = 42
+X_train, X_test, y_train, y_test = train_test_split(X, y, stratify=y['louvain'], test_size = 0.25, shuffle=True, random_state=random_state)
+
+
 # Lasso
 lasso = Lasso(random_state=random_state, max_iter=1000)
+path = './model_selection/lasso/'
 #lasso_grid = [{'alpha':[1, 1.1, 1.5, 2, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55, 60, 65, 70, 75, 80, 90, 100, 150]}]
 #lasso_grid = [{'alpha':[1.91203544e-01, 1.78317065e-01, 1.66299092e-01, 1.55091090e-01,
 
@@ -77,49 +85,40 @@ lasso = Lasso(random_state=random_state, max_iter=1000)
 
 lasso_grid = [{'alpha':[0.191203544, 0.0951624546, 0.0473625779, 0.0235724666, 0.0117320722, 0.00583907997, 0.00290612386, 0.00144638469, 0.00071986907, 0.000358280533]}]
 
-
 ## Ridge
 ridge = Ridge(random_state=random_state)
+path = './model_selection/ridge.pkl'
 # 38 seemed really good overall..
 ridge_grid = [{'alpha':[1, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55, 60, 65, 70, 75, 80, 90, 100, 150]}]
 
+# clf = gridSearch_validation(X_train.loc[:, X_train.columns != 'louvain'], 
+#                         y_train.loc[:, y_train.columns != 'louvain'],
+#                         ridge, ridge_grid, n_splits, path)
 
-## Random Forest; ran this without NONE features, would have been cool..
+## Random Forest
 rf = RandomForestRegressor(n_jobs=-1, random_state=random_state)
-rf_grid = [{'max_depth': [10, 30, 50, 70, 90],
-            'max_features': ['auto', 'sqrt', 40, 'log2', None],
-            'n_estimators': [10]
+rf_grid = [{'max_depth': [10, 20, 30, 40, 50, 60, 70, 80, 90, 100, None],
+            'max_features': ['auto', 'sqrt', 40, 'log2'],
+            'n_estimators': [10, 100]
             }]
 
 
-linear = LinearRegression()
-linear_grid = [{}]
 
 
-### CHANGE ###
-model = linear 
-grid = linear_grid
-path ='./model_selection/'+str(model)+'/' 
+#CHANGE
+model = rf
+grid = rf_grid
 
-pred, X, velocity_genes, y = dp.get_data(predictors='tf160', louvain=True)
-
-
-
-n_splits = 10
-X_train, X_test, y_train, y_test = train_test_split(X, y, stratify=y['louvain'], test_size = 0.25, shuffle=True, random_state=random_state)
-
-
+### comment this in!!
+path ='./model_selection/R'+str(model)+'/' 
 if os.path.exists(path):
     print('Path does exist under directory', os.getcwd()+path)
     shutil.rmtree(path)
-os.makedirs(path)
-os.makedirs(path+'plots/')
- 
-## HERE I CHANGED SOMETHING. adding plots directory..
+os.mkdir(path)
 
-### change hier to exclude target from predictors. 
+
 # X_train.loc[:, (X_train.columns != 'louvain') & (X_train.columns != 'Mcm3')]
-total = Parallel(n_jobs=-1)(delayed(gridSearch_validation) (X_train.loc[:, (X_train.columns != 'louvain') & (X_train.columns != t)], 
+total = Parallel(n_jobs=-1)(delayed(randomSearch_validation) (X_train.loc[:, X_train.columns != 'louvain'], 
                                                             y_train.loc[:, t],
                                                             model, grid, n_splits, path+t+'.pkl') 
                                         for t in [x for x in y.columns.tolist() if x != 'louvain'])
@@ -136,4 +135,4 @@ end = time.time()
 
 hours, rem = divmod(end-start, 3600)
 minutes, seconds = divmod(rem, 60)
-print("This is the time passed: {:0>2}:{:0>2}:{:05.2f}".format(int(hours),int(minutes),seconds))
+print("THis is the time passed: {:0>2}:{:0>2}:{:05.2f}".format(int(hours),int(minutes),seconds))

@@ -32,7 +32,14 @@ def get_predictors(predictors):
 def get_data(predictors = 'tf160',targets='velocity_genes', datafile="velocity_adata.h5ad", louvain=False):
     # load dataset
     vdata = sc.read_h5ad(datafile)
-    pred = get_predictors(predictors)
+
+     # velocity genes
+    velocity_genes = vdata[:,vdata.var['velocity_genes']].var.index.tolist()
+
+    if predictors=='velocity_genes':
+        pred = velocity_genes
+    else: 
+        pred = get_predictors(predictors)
 
     # check if all variables are in dataset. 
     # not working right now..
@@ -45,9 +52,6 @@ def get_data(predictors = 'tf160',targets='velocity_genes', datafile="velocity_a
     sc.pp.scale(vdata, layer='Ms')
     sc.pp.scale(vdata, layer='velocity')
 
-
-    # velocity genes
-    velocity_genes = vdata[:,vdata.var['velocity_genes']].var.index.tolist()
 
     X = vdata[:, pred].to_df('Ms')
     Y = vdata[:, velocity_genes].to_df('velocity')

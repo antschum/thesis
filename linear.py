@@ -7,7 +7,7 @@ start = time.time()
 # Update this. 
 filepath = './linearQuick/'
 database_file = 'data/regnet160_all.pkl'
-model = LinearRegression()
+model = LinearRegression(random_state=42)
 
 predictors, X, velocity_genes, y = dp.get_data('tf160')
 
