@@ -6,7 +6,7 @@ import matplotlib.pyplot as plt
 import pandas as pd
 
 ## Load Data 
-def compile_gridsearches_rf(filepath):
+def compile_gridsearches_rf(filepath, max_features=151):
 
     
     best ={}
@@ -21,9 +21,9 @@ def compile_gridsearches_rf(filepath):
                 
                 l = []
                 for s in gcv.cv_results_['param_max_features'].data:
-                    if s=='sqrt': l+=[12]
-                    elif s=='auto': l+=[151]
-                    elif s=='log2': l+=[7]
+                    if s=='sqrt': l+=[round(np.sqrt(max_features))]
+                    elif s=='auto': l+=[max_features]
+                    elif s=='log2': l+=[round(np.log2(max_features))]
                     else: l+=[s]
                 #gcv.cv_results_['best_param_features'] is a mask, not easily changed.. 
                 

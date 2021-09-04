@@ -19,6 +19,7 @@ start = time.time()
 filepath = './rf_md30/'
 database_file = 'data/regnet160_all.pkl'
 max_depth = 30
+max_features = 40
 
 if os.path.exists(filepath):
     print('Path does exist under directory', os.getcwd()+filepath)
@@ -28,26 +29,12 @@ os.mkdir(filepath+'estimators')
 os.mkdir(filepath+'coefs')
 
 
-model = RandomForestRegressor(n_jobs=-1, max_depth=max_depth, max_features='sqrt')
+model = RandomForestRegressor(n_jobs=-1, max_depth=max_depth, max_features=max_features)
 
-vdata = sc.read_h5ad('velocity_adata.h5ad')
-sc.pp.scale(vdata, layer='Ms')
-sc.pp.scale(vdata, layer='velocity')
-velocity_genes = vdata.var.index[vdata.var['velocity_genes'] == True].tolist()
+predictors, X, velocity_genes, y = dp.get_data('tf160')
 
-open_file = open('data/transcriptionfactors160.pkl', "rb")
-pred = pickle.load(open_file)
-open_file.close()    
-
-# remove factors not available in vdata.var_names -> should be filtered out by default. 
-for x in  ['Junb', 'mt-Nd1', 'Fgl2', 'mt-Co1', 'mt-Nd4', 'Rraga', 'mt-Nd2']:
-    if x in pred:
-        pred.remove(x)
-
-# generate with this!!!
-X = vdata[:, pred].to_df('Ms')
-X['louvain'] = vdata[:, pred].obs['louvain']
-X['sampleID'] = vdata[:, pred].obs['sampleID']
+# X['louvain'] = vdata[:, pred].obs['louvain']
+# X['sampleID'] = vdata[:, pred].obs['sampleID']
 
 def help_feature_importances(estimator, predictors, target):
     return pd.DataFrame(estimator.feature_importances_.reshape(1,-1), index=target, columns=predictors)
@@ -61,8 +48,9 @@ def generate_reg(X, y, model, target, n_splits=10):
     s['target'] = [target]*n_splits
     print('done for:'+target)
     
-    for x in list(range(n_splits)):
-        joblib.dump(s['estimator'][x], filepath+'estimators/'+target+'_'+str(x)+'.joblib', compress=3)
+    ### not saving estimators anymore. not relevant.
+    #for x in list(range(n_splits)):
+     #   joblib.dump(s['estimator'][x], filepath+'estimators/'+target+'_'+str(x)+'.joblib', compress=3)
    
     importance = pd.concat([help_feature_importances(x[0], X.columns, [x[1]]) for x in list(zip(s['estimator'],s['target']))])
     importance.to_pickle(filepath+'coefs/'+target+'.pkl')
@@ -76,7 +64,7 @@ print('prep done.')
 
 #results = Parallel(n_jobs=10)(delayed(generate_reg) (X, vdata[:, v].layers['velocity'], model, v) for v in velocity_genes)
 #results = pd.concat(results)
-results = pd.concat([generate_reg(X, vdata[:, v].layers['velocity'], model, v) for v in velocity_genes])
+results = pd.concat([generate_reg(X, y, model, v) for v in velocity_genes])
 results.to_pickle(filepath+'Scores.pkl')
 print('CV generated.') 
 

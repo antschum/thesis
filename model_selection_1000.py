@@ -81,7 +81,7 @@ ridge_grid = [{'alpha':[1, 50, 100, 150, 200, 250, 300, 350, 400, 450, 500, 550,
 ## Random Forest
 rf = RandomForestRegressor(n_jobs=-1, random_state=random_state)
 rf_grid = [{'max_depth': [10, 30, 50, 70, 90],
-            'max_features': ['auto', 'sqrt', 40, 'log2'],
+            'max_features': ['auto', 'sqrt', 370, 'log2'],
             'n_estimators': [10]
             }]
 
@@ -91,8 +91,8 @@ linear_grid = [{}]
 
 
 ### CHANGE ###
-model = linear 
-grid = linear_grid
+model = rf
+grid = rf_grid
 path ='./model_selection/'+'vpred/'+str(model)+'/' 
 
 pred, X, velocity_genes, y = dp.get_data(predictors='velocity_genes', louvain=True)
