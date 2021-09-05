@@ -1,4 +1,4 @@
-from joblib.parallel import Parallel, delayed
+from joblib import Parallel, delayed
 import datapreprocessing as dp
 from sklearn.ensemble import RandomForestRegressor
 from sklearn.model_selection import train_test_split, cross_validate, KFold
@@ -14,6 +14,8 @@ import sys
 
 # Generate Regressions for rf.
 # Running this for all 160tf took a little less than 2 hr
+
+#cwd = os.getcwd()
 
 start = time.time()
 filepath = './rf_md30/'
@@ -44,7 +46,7 @@ def generate_reg(X, y, model, target, n_splits=10):
     cv = KFold(n_splits=n_splits, shuffle=True, random_state=42)
 
     # removed proportion score... and n_jobs
-    s = cross_validate(model, X, y.ravel(), cv=cv, scoring = {'r2': 'r2', 'neg_mean_squared_error':'neg_mean_squared_error'}, return_train_score=True, return_estimator=True, n_jobs=-1)
+    s = cross_validate(model, X, y, cv=cv, scoring = {'r2': 'r2', 'neg_mean_squared_error':'neg_mean_squared_error'}, return_train_score=True, return_estimator=True, n_jobs=-1)
     s['target'] = [target]*n_splits
     print('done for:'+target)
     

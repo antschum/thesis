@@ -5,9 +5,9 @@ import time
 
 start = time.time()
 # Update this. 
-filepath = './ridge/'
+filepath = './ridge151/'
 database_file = 'data/regnet160_all.pkl'
-model = Ridge()
+model = Ridge(alpha=35)
 
 predictors, X, velocity_genes, y = dp.get_data('tf160')
 
