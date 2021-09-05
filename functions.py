@@ -91,7 +91,6 @@ def reorder_like_clustermap(data, clustermap):
 
 
 def help_summary(msl, regnet_all):
-    
     data = pd.DataFrame()
     summary = {}
     #percentages = [0.01, 0.05, 0.1, 0.15, 0.2, 0.25, 0.3, 0.35, 0.4, 0.5]
@@ -101,8 +100,8 @@ def help_summary(msl, regnet_all):
     # Cut down on for loops!!
     for i in percentages:
         n = int(len(msl)*i/2)
-        smallest = msl.nsmallest(columns='mean/sd', n=n)
-        largest = msl.nlargest(columns='mean/sd', n=n)
+        smallest = msl.nsmallest(columns='median', n=n)
+        largest = msl.nlargest(columns='median', n=n)
         data = pd.concat([smallest, largest], axis=0)
         # Comparing Data from RegNetWeb
 
@@ -127,11 +126,77 @@ def help_summary(msl, regnet_all):
     return summary, percentages
 
 
+# data = msl
+#     data['median'] = msl['median'].abs()
+#     data = data.sort_values('median')
+#     summary = {}
+    
+#     #percentages = [0.01, 0.05, 0.1, 0.15, 0.2, 0.25, 0.3, 0.35, 0.4, 0.5]
+#     percentages = np.arange(0, 1.02, 0.02)
+#     indices = np.rint(percentages * len(msl)).astype(int)
+#     start = 0
+#     last = {x: {'total': 0, 'matchP':[], 'matchT':[]} for x in msl['predictors'].drop_duplicates().tolist()}
 
+#     # Are there suitibel pandas functions that can do the same as I am here? 
+#     # Cut down on for loops!!
+#     # I only need to go through everything once. 
+#     for p, i in list(zip(percentages, indices)):
+#         section = data.iloc[start:i]
+#         start=i
+
+#         predictors = section['predictors'].drop_duplicates().tolist()
+
+#         for x in predictors:
+#             t = regnet_all[regnet_all['regulator_symbol']==x]['target_symbol'].tolist()
+#             d = section[section['predictors']==x]['target'].tolist()
+#             s = list(set(t) & set(d))
+#             last[x]['total']+=len(t) 
+#             last[x]['matchP']+= s
+#             summary.setdefault(str(p), {})[x] = last[x]
+
+#         for x in predictors:
+#             t = regnet_all[regnet_all['target_symbol']==x]['regulator_symbol'].tolist()
+#             d = section[section['predictors']==x]['target'].tolist()
+#             s = list(set(t) & set(d))
+#             last[x]['total']+=len(t) 
+#             last[x]['matchT']+= s
+#             summary.setdefault(str(p), {})[x] = last[x]
+            
+#         if str(p) not in summary:
+#             summary.setdefault(str(p), {})['dummy']={'total': 0, 'matchP': [], 'matchT': []}
+
+
+#     # for i in percentages:
+#     #     n = int(len(msl)*i/2)
+#     #     smallest = msl.nsmallest(columns='mean/sd', n=n)
+#     #     largest = msl.nlargest(columns='mean/sd', n=n)
+#     #     data = pd.concat([smallest, largest], axis=0)
+#     #     # Comparing Data from RegNetWeb
+
+#     #     predictors = data['predictors'].drop_duplicates().tolist()
+
+#     #     for x in predictors:
+#     #         t = regnet_all[regnet_all['regulator_symbol']==x]['target_symbol'].tolist()
+#     #         d = data[data['predictors']==x]['target'].tolist()
+#     #         s = list(set(t) & set(d))
+#     #         summary.setdefault(str(i), {})[x]={'total': len(t), 'matchP': s}
+
+#     #     for x in predictors:
+#     #         t = regnet_all[regnet_all['target_symbol']==x]['regulator_symbol'].tolist()
+#     #         d = data[data['predictors']==x]['target'].tolist()
+#     #         s = list(set(t) & set(d))
+#     #         summary[str(i)][x]['total']+= len(t)
+#     #         summary[str(i)][x]['matchT']= s
+            
+#     #     if str(i) not in summary:
+#     #         summary.setdefault(str(i), {})['dummy']={'total': 0, 'matchP': [], 'matchT': []}
+
+
+#     return summary, percentages
 def shuffle_meanSD(msl):
         permut = pd.DataFrame()
         permut['predictors'], permut['target'] = msl['predictors'], msl['target']
-        permut['mean/sd'] = msl['mean/sd'].sample(frac=1).reset_index(drop=True)
+        permut['median'] = msl['median'].sample(frac=1).reset_index(drop=True)
         return permut
 
 def help_summary_to_count(summary, percentages):
@@ -161,14 +226,14 @@ def permutations(msl, regnet_all, c = 1):
     return count
 
 # GO WITH MEDIAN HERE>i
-def help_meanSD(coefs):
+def help_median(coefs):
     msl = pd.DataFrame()
     msl['mean'] = coefs.groupby(['predictors', 'target']).coefficients.mean()
     msl['sd'] = coefs.groupby(['predictors', 'target']).coefficients.std()
-    msl['mean/sd'] = msl['mean']/msl['sd']
+    msl['median'] = coefs.groupby(['predictors', 'target']).coefficients.median() 
 
-    msl = msl.reset_index(col_fill =['predictors', 'target', 'mean', 'sd', 'mean/sd']) 
-    print('This is the output of meanSD', msl)
+    msl = msl.reset_index(col_fill =['predictors', 'target', 'mean', 'sd', 'median']) 
+    print('This is the output of median', msl)
     return msl
 
 def help_import_database(database):
@@ -193,7 +258,7 @@ def evaluate_permutations(coefs, database_file, path):
     regnet_all = help_import_database(database_file)
 
     # update df for mena/sd ratio
-    msl = help_meanSD(coefs)
+    msl = help_median(coefs)
     
     #THIS IS STILL A WORK IN PROGRESS. 
     # permutations
@@ -247,7 +312,7 @@ def merge_regnet(regnet_regulators_file, regnet_targets_file, targets, file_name
 def predicted_counts(coefs, database_file, filepath):
     # generate predicted counts
     regnet_all = help_import_database(database_file)
-    coefs = help_meanSD(coefs)
+    coefs = help_median(coefs)
     summary, percentages = help_summary(coefs, regnet_all)
     count = help_summary_to_count(summary, percentages)
 

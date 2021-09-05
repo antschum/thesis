@@ -31,7 +31,7 @@ os.mkdir(filepath+'estimators')
 os.mkdir(filepath+'coefs')
 
 
-model = RandomForestRegressor(n_jobs=-1, max_depth=max_depth, max_features=max_features)
+model = RandomForestRegressor(n_jobs=-1, max_depth=max_depth, max_features=max_features, n_estimators=10)
 
 predictors, X, velocity_genes, y = dp.get_data('tf160')
 
@@ -66,7 +66,7 @@ print('prep done.')
 
 #results = Parallel(n_jobs=10)(delayed(generate_reg) (X, vdata[:, v].layers['velocity'], model, v) for v in velocity_genes)
 #results = pd.concat(results)
-results = pd.concat([generate_reg(X, y, model, v) for v in velocity_genes])
+results = pd.concat([generate_reg(X, y[v], model, v) for v in velocity_genes])
 results.to_pickle(filepath+'Scores.pkl')
 print('CV generated.') 
 
