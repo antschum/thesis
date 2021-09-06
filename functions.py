@@ -13,6 +13,7 @@ from sklearn.metrics import explained_variance_score, mean_absolute_error, r2_sc
 import sys
 import multiprocessing as mp
 from joblib import Parallel, delayed
+import scipy.stats as st
 #import memory_profiler
 
 
@@ -320,3 +321,20 @@ def predicted_counts(coefs, database_file, filepath):
         pickle.dump(count, f)
     
     return count
+
+
+def get_pvalue(count, permut):
+    # calculating p-value without first and last group, since std is 0 here. 
+    z_score = (np.array(count['matches'][1:-1])-np.array(permut['mean'][1:-1]))/np.array(permut['std'][1:-1])
+
+
+    #cumulative distribution function
+    # --> not sure if I should take 1- ? for righttailed test? yes. or just use sf.
+    p_values = st.norm.sf(z_score)
+
+
+    # significance 5%
+    top = st.norm.ppf(.975)
+    bottom = st.norm.ppf(.025)
+    
+    return (p_values, z_score)
