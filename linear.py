@@ -5,9 +5,9 @@ import time
 
 start = time.time()
 # Update this. 
-filepath = './linearQuick/'
+filepath = './linear/'
 database_file = 'data/regnet160_all.pkl'
-model = LinearRegression(random_state=42)
+model = LinearRegression()
 
 predictors, X, velocity_genes, y = dp.get_data('tf160')
 

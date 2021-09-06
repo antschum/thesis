@@ -9,7 +9,7 @@ start = time.time()
 # Update this. 
 filepath = './lasso/'
 database_file = 'data/regnet160_all.pkl'
-model = Lasso(alpha=0.000013)
+model = Lasso(alpha=0.0007)
 
 predictors, X, velocity_genes, y = dp.get_data('tf160')
 
